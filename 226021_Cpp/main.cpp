@@ -84,61 +84,116 @@ public:
 };
 
 #include <malloc.h>
+#include <initializer_list>
+
 template <class T>
 class mang
 {
 public:
-	T* memory;
-	int lenght;
+	T* vung_nho;
+	int so_luong_phan_tu;
 
 	mang(int len)
 	{
-		memory = (T*)calloc(len, sizeof(T));
-		lenght = len;
+		vung_nho = (T*)calloc(len, sizeof(T));
+		if (vung_nho == NULL)
+		{
+			throw("cap phat memory that bai");
+		}
+		so_luong_phan_tu = len;
 	}
+
+	mang(initializer_list<T> init_list)
+	{
+		vung_nho = (T*)calloc(init_list.size(), sizeof(T));
+		if (vung_nho == NULL)
+		{
+			throw("cap phat memory that bai");
+		}
+		int index = 0;
+		for (T phan_tu_trong_init_list : init_list)
+		{
+			vung_nho[index++] = phan_tu_trong_init_list;
+		}
+		so_luong_phan_tu = init_list.size();
+	}
+	
+	// thêm phần tử vào cuối mãng
+	void them_phan_tu_cuoi_mang(T gia_tri_phan_tu)
+	{
+		// cấp phát vùng nhớ mới lớn hơn vùng nhớ củ 1 phần tử
+		T* vung_nho_moi = (T*)calloc(so_luong_phan_tu + 1, sizeof(T));
+
+		// copy dữ liệu từ vùng nhớ củ vào vùng nhớ mới
+		for (int i = 0; i < so_luong_phan_tu; i++)
+		{
+			vung_nho_moi[i] = vung_nho[i];
+		}
+
+		// set giá trị cho phần tử cuối mãng
+		vung_nho_moi[so_luong_phan_tu] = gia_tri_phan_tu;
+
+		// giải phóng vùng nhớ củ
+		free(vung_nho);
+
+		// cập nhật vùng nhớ mới vào `vung_nho` và `so_luong_phan_tu`
+		vung_nho = vung_nho_moi;
+		so_luong_phan_tu++;
+	}
+	// insert phần tử vào vị trí bất kỳ của mãng
+	void chen_phan_tu_vao_mang(int vi_tri, T gia_tri_pha_tu)
+	{
+		// cấp phát vùng nhớ mới lớn hơn vùng nhớ củ 1 phần tử
+		T* vung_nho_moi = (T*)calloc(so_luong_phan_tu + 1, sizeof(T));
+
+		// copy dữ liệu từ vùng nhớ củ vào vùng nhớ mới
+		for (int i = 0; i < vi_tri; i++)
+		{
+			vung_nho_moi[i] = vung_nho[i];
+		}
+		vung_nho_moi[vi_tri] = gia_tri_pha_tu;
+		for (int i = vi_tri; i < so_luong_phan_tu; i++)
+		{
+			vung_nho_moi[i + 1] = vung_nho[i];
+		}
+		// giải phóng vùng nhớ củ
+		free(vung_nho);
+		// cập nhật vùng nhớ mới vào `vung_nho` và `so_luong_phan_tu`
+		vung_nho = vung_nho_moi;
+		so_luong_phan_tu++;
+	}
+	
 
 	T& operator[](int index)
 	{
-		return memory[index];
+		return vung_nho[index];
 	}
 
 	~mang()
 	{
-		free(memory);
+		free(vung_nho);
 	}
 };
 
-
-
-//int cong(int x, int y)
-//{
-//	cout << "ham cong int" << endl;
-//	return x + y;
-//}
-//float cong(float x, float y)
-//{
-//	cout << "ham cong float" << endl;
-//	return x + y;
-//}
-//double cong(double x, double y)
-//{
-//	cout << "ham cong double" << endl;
-//	return x + y;
-//}
-
-template <typename kieu_du_lieu_mau>
-kieu_du_lieu_mau cong(kieu_du_lieu_mau x, kieu_du_lieu_mau y)
+ostream& operator<<(ostream& os, mang<int>& arr)
 {
-	return x + y;
+	os << "{ ";
+	for (int i = 0; i < arr.so_luong_phan_tu; i++)
+	{
+		os << arr[i] << " ";
+	}
+	os << "}";
+	return os;
 }
 
-
-
+#include <array>
+#include <vector>
 int main()
 {
+	mang<int> arr = { 1,2,3,4,5 };
 
-	mang<int> A(3);
-	mang<phan_so> B(3);
-
+	cout << "Mang: " << arr << endl;
+	arr.chen_phan_tu_vao_mang(2, 6);
+	cout << "Mang: " << arr << endl;
 	return 0;
 }
