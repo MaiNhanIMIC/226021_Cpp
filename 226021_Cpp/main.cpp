@@ -61,14 +61,14 @@ public:
 	//		+ output: không có output
 	phan_so()
 	{
-		cout << "Ham tao 0 input" << endl;
+		//cout << "Ham tao 0 input" << endl;
 		tu = 0;
 		mau = 0;
 	}
 
 	phan_so(int _tu, int _mau)
 	{
-		cout << "Ham tao 2 input" << endl;
+		//cout << "Ham tao 2 input" << endl;
 		tu = _tu;
 		mau = _mau;
 	}
@@ -79,7 +79,7 @@ public:
 	//		+ output: không có
 	~phan_so()
 	{
-		cout << "doi da giai phong vung nho" << endl;
+		//cout << "doi da giai phong vung nho" << endl;
 	}
 };
 
@@ -123,7 +123,10 @@ public:
 	{
 		// cấp phát vùng nhớ mới lớn hơn vùng nhớ củ 1 phần tử
 		T* vung_nho_moi = (T*)calloc(so_luong_phan_tu + 1, sizeof(T));
-
+		if (vung_nho_moi == NULL)
+		{
+			throw("cap phat memory that bai");
+		}
 		// copy dữ liệu từ vùng nhớ củ vào vùng nhớ mới
 		for (int i = 0; i < so_luong_phan_tu; i++)
 		{
@@ -145,7 +148,10 @@ public:
 	{
 		// cấp phát vùng nhớ mới lớn hơn vùng nhớ củ 1 phần tử
 		T* vung_nho_moi = (T*)calloc(so_luong_phan_tu + 1, sizeof(T));
-
+		if (vung_nho_moi == NULL)
+		{
+			throw("cap phat memory that bai");
+		}
 		// copy dữ liệu từ vùng nhớ củ vào vùng nhớ mới
 		for (int i = 0; i < vi_tri; i++)
 		{
@@ -175,6 +181,40 @@ public:
 	}
 };
 
+
+// sap xep mang
+bool so_sanh(int x, int y)
+{
+	if (x > y) return true;
+	else return false;
+}
+
+bool so_sanh_phan_so(phan_so x, phan_so y)
+{
+	float gia_tri_x = (float)x.tu / x.mau;
+	float gia_tri_y = (float)y.tu / y.mau;
+	if (gia_tri_x > gia_tri_y) return true;
+	else return false;
+}
+// sử dụng template + con trỏ hàm
+template<typename T>
+void sap_xep_mang(mang<T>& mang, bool (*ham_so_sanh)(T,T))
+{
+	for (int i = 0; i < mang.so_luong_phan_tu - 1; i++)
+	{
+		for (int j = i; j < mang.so_luong_phan_tu; j++)
+		{
+			if (ham_so_sanh(mang[i], mang[j]))
+			{
+				auto temp = mang[i];
+				mang[i] = mang[j];
+				mang[j] = temp;
+			}
+		}
+	}
+}
+
+
 ostream& operator<<(ostream& os, mang<int>& arr)
 {
 	os << "{ ";
@@ -186,14 +226,26 @@ ostream& operator<<(ostream& os, mang<int>& arr)
 	return os;
 }
 
-#include <array>
-#include <vector>
+ostream& operator<<(ostream& os, mang<phan_so>& arr)
+{
+	os << "{ ";
+	for (int i = 0; i < arr.so_luong_phan_tu; i++)
+	{
+		os << arr[i].tu << "/" << arr[i].mau;
+		os << "(" << (float)arr[i].tu / arr[i].mau << ") ";
+	}
+	os << "}";
+	return os;
+}
+// 1. Viết hàm ostream& operator<<(ostream& os, mang<hinh_chu_nhat_c>& arr)
+// 2. khai báo mãng bao gồm nhiều hình chữ nhật
+// 3. sắp xếp mãng hình chữ nhật theo diện tích tăng dần
 int main()
 {
-	mang<int> arr = { 1,2,3,4,5 };
+	mang<phan_so> arr = { phan_so(1,2), phan_so(3,4), phan_so(2,3) };
 
-	cout << "Mang: " << arr << endl;
-	arr.chen_phan_tu_vao_mang(2, 6);
-	cout << "Mang: " << arr << endl;
+	cout << "truoc: " << arr << endl;
+	sap_xep_mang(arr, so_sanh_phan_so);
+	cout << "sau: " << arr << endl;
 	return 0;
 }
