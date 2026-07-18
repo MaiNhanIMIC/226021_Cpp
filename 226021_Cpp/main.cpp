@@ -1,204 +1,23 @@
 ﻿#include <stdio.h>
 #include <iostream>
+#include "mang_co_dan.h"
 
 using namespace std;
 
-// xây dựng struct để miêu tả đối tượng là hình chữ nhật
-//	+ chiều dài
-//	+ chiều rộng
-struct hinh_chu_nhat_s
+#include "class.h"
+
+ostream& operator<<(ostream& os, hocsinh& A)
 {
-	int dai;
-	int rong;
-};
-
-class hinh_chu_nhat_c
-{
-public:
-	// bien: - mieu ta dac diem doi tuong
-	int dai;
-	int rong;
-	// ham: - mieu ta hanh dong/hanh vi cua doi tuong
-	int tinh_dien_tich()
-	{
-		return dai * rong;
-	}
-	int tinh_chu_vi()
-	{
-		return (dai + rong) * 2;
-	}
-};
-
-
-class phan_so
-{
-public:
-	// dac diem cua doi tuong
-	int tu;
-	int mau;
-
-	// hanh vi/hanh dong
-	phan_so nhan_phan_so_khac(phan_so khac)
-	{
-		phan_so ketqua;
-		ketqua.tu = tu * khac.tu;
-		ketqua.mau = mau * khac.mau;
-		return ketqua;
-	}
-
-
-	phan_so operator*(phan_so khac)
-	{
-		phan_so ketqua;
-		ketqua.tu = tu * khac.tu;
-		ketqua.mau = mau * khac.mau;
-		return ketqua;
-	}
-
-	// hàm tạo: tự động được gọi khi đối tướng được tạo ra
-	//		+ tên: trùng với tên class
-	//		+ input: có thể có 0,1,2,3... input
-	//		+ output: không có output
-	phan_so()
-	{
-		//cout << "Ham tao 0 input" << endl;
-		tu = 0;
-		mau = 0;
-	}
-
-	phan_so(int _tu, int _mau)
-	{
-		//cout << "Ham tao 2 input" << endl;
-		tu = _tu;
-		mau = _mau;
-	}
-
-	// hàm hủy: Tự động được gọi khi đối tượng bị hủy (bị giải phòng vùng nhớ)
-	//		+ tên: trùng với tên class và thêm ~ ở phía trước
-	//		+ input: không có
-	//		+ output: không có
-	~phan_so()
-	{
-		//cout << "doi da giai phong vung nho" << endl;
-	}
-};
-
-#include <malloc.h>
-#include <initializer_list>
-
-template <class T>
-class mang
-{
-public:
-	T* vung_nho;
-	int so_luong_phan_tu;
-
-	mang(int len)
-	{
-		vung_nho = (T*)calloc(len, sizeof(T));
-		if (vung_nho == NULL)
-		{
-			throw("cap phat memory that bai");
-		}
-		so_luong_phan_tu = len;
-	}
-
-	mang(initializer_list<T> init_list)
-	{
-		vung_nho = (T*)calloc(init_list.size(), sizeof(T));
-		if (vung_nho == NULL)
-		{
-			throw("cap phat memory that bai");
-		}
-		int index = 0;
-		for (T phan_tu_trong_init_list : init_list)
-		{
-			vung_nho[index++] = phan_tu_trong_init_list;
-		}
-		so_luong_phan_tu = init_list.size();
-	}
-	
-	// thêm phần tử vào cuối mãng
-	void them_phan_tu_cuoi_mang(T gia_tri_phan_tu)
-	{
-		// cấp phát vùng nhớ mới lớn hơn vùng nhớ củ 1 phần tử
-		T* vung_nho_moi = (T*)calloc(so_luong_phan_tu + 1, sizeof(T));
-		if (vung_nho_moi == NULL)
-		{
-			throw("cap phat memory that bai");
-		}
-		// copy dữ liệu từ vùng nhớ củ vào vùng nhớ mới
-		for (int i = 0; i < so_luong_phan_tu; i++)
-		{
-			vung_nho_moi[i] = vung_nho[i];
-		}
-
-		// set giá trị cho phần tử cuối mãng
-		vung_nho_moi[so_luong_phan_tu] = gia_tri_phan_tu;
-
-		// giải phóng vùng nhớ củ
-		free(vung_nho);
-
-		// cập nhật vùng nhớ mới vào `vung_nho` và `so_luong_phan_tu`
-		vung_nho = vung_nho_moi;
-		so_luong_phan_tu++;
-	}
-	// insert phần tử vào vị trí bất kỳ của mãng
-	void chen_phan_tu_vao_mang(int vi_tri, T gia_tri_pha_tu)
-	{
-		// cấp phát vùng nhớ mới lớn hơn vùng nhớ củ 1 phần tử
-		T* vung_nho_moi = (T*)calloc(so_luong_phan_tu + 1, sizeof(T));
-		if (vung_nho_moi == NULL)
-		{
-			throw("cap phat memory that bai");
-		}
-		// copy dữ liệu từ vùng nhớ củ vào vùng nhớ mới
-		for (int i = 0; i < vi_tri; i++)
-		{
-			vung_nho_moi[i] = vung_nho[i];
-		}
-		vung_nho_moi[vi_tri] = gia_tri_pha_tu;
-		for (int i = vi_tri; i < so_luong_phan_tu; i++)
-		{
-			vung_nho_moi[i + 1] = vung_nho[i];
-		}
-		// giải phóng vùng nhớ củ
-		free(vung_nho);
-		// cập nhật vùng nhớ mới vào `vung_nho` và `so_luong_phan_tu`
-		vung_nho = vung_nho_moi;
-		so_luong_phan_tu++;
-	}
-	
-
-	T& operator[](int index)
-	{
-		return vung_nho[index];
-	}
-
-	~mang()
-	{
-		free(vung_nho);
-	}
-};
-
-
-// sap xep mang
-bool so_sanh(int x, int y)
-{
-	if (x > y) return true;
-	else return false;
+	os << "ten: " << A.ten << endl;
+	os << "diem toan: " << A.diem_toan << endl;
+	os << "diem van: " << A.diem_van << endl;
+	os << "diem trung binh: " << A.diem_trung_binh() << endl;
+	return os;
 }
 
-bool so_sanh_phan_so(phan_so x, phan_so y)
-{
-	float gia_tri_x = (float)x.tu / x.mau;
-	float gia_tri_y = (float)y.tu / y.mau;
-	if (gia_tri_x > gia_tri_y) return true;
-	else return false;
-}
-// sử dụng template + con trỏ hàm
-template<typename T>
-void sap_xep_mang(mang<T>& mang, bool (*ham_so_sanh)(T,T))
+
+template<typename T, typename ham>
+void sap_xep_mang(mang<T>& mang, ham ham_so_sanh)
 {
 	for (int i = 0; i < mang.so_luong_phan_tu - 1; i++)
 	{
@@ -214,38 +33,28 @@ void sap_xep_mang(mang<T>& mang, bool (*ham_so_sanh)(T,T))
 	}
 }
 
-
-ostream& operator<<(ostream& os, mang<int>& arr)
-{
-	os << "{ ";
-	for (int i = 0; i < arr.so_luong_phan_tu; i++)
-	{
-		os << arr[i] << " ";
-	}
-	os << "}";
-	return os;
-}
-
-ostream& operator<<(ostream& os, mang<phan_so>& arr)
-{
-	os << "{ ";
-	for (int i = 0; i < arr.so_luong_phan_tu; i++)
-	{
-		os << arr[i].tu << "/" << arr[i].mau;
-		os << "(" << (float)arr[i].tu / arr[i].mau << ") ";
-	}
-	os << "}";
-	return os;
-}
-// 1. Viết hàm ostream& operator<<(ostream& os, mang<hinh_chu_nhat_c>& arr)
-// 2. khai báo mãng bao gồm nhiều hình chữ nhật
-// 3. sắp xếp mãng hình chữ nhật theo diện tích tăng dần
+#include <algorithm>
+#include <vector>
 int main()
 {
-	mang<phan_so> arr = { phan_so(1,2), phan_so(3,4), phan_so(2,3) };
+	vector<hocsinh> A = {
+		hocsinh("Nguyen Van A", 6,7),
+		hocsinh("Nguyen Van B", 7,5),
+		hocsinh("Nguyen Van C", 6,5),
+		hocsinh("Nguyen Van D", 7,8),
+		hocsinh("Nguyen Van E", 8,4)
+	};
+	sort(A.begin(), A.end(), [](hocsinh A, hocsinh B) {
+		return (A.diem_trung_binh() < B.diem_trung_binh());
+		});
+	//sap_xep_mang(A, [](hocsinh A, hocsinh B) {
+	//		return (A.diem_trung_binh() > B.diem_trung_binh());
+	//	});
 
-	cout << "truoc: " << arr << endl;
-	sap_xep_mang(arr, so_sanh_phan_so);
-	cout << "sau: " << arr << endl;
+	for (auto hs : A)
+	{
+		cout << hs << endl;
+	}
+
 	return 0;
 }
